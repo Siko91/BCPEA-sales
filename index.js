@@ -42,5 +42,5 @@ function storeCSV(arrayOfObj) {
     const keys = Object.keys(arrayOfObj[0]);
     fs.writeFileSync("parsedSales.csv",
         keys.map(i =>`"${i}"`).join(",") + "\n" +
-        arrayOfObj.map(l => keys.map(k => `"${l[k]}"`).join(",") + "\n"));
+        arrayOfObj.map(l => keys.map(k => `"${l[k]}"`).join(",")).join("\n"));
 }

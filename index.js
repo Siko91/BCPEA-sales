@@ -7,6 +7,7 @@ const source = "https://sales.bcpea.org/properties?perpage=10000&p=1";
 
 parse(readPage()).then((data) => storeCSV(formatData(data)))
 
+
 async function storePage() {
     const res = await axios.get(source);
     fs.writeFileSync("./sales.bcpea.org.html", res.data)
@@ -25,15 +26,19 @@ async function parse(htmlContents) {
             size: ".header .category",
             price: ".content--price .price",
             region: ".label__group:nth-child(1) .info",
-            // address: ".label__group:nth-child(2) .info",
-            court: "col:nth-child(3) .label__group:nth-child(1) .info",
-            bailiff: "col:nth-child(3) .label__group:nth-child(2) .info",
-            period: "col:nth-child(3) .label__group:nth-child(3) .info",
-            ends: "col:nth-child(3) .label__group:nth-child(4) .info",
+            court: ".col:nth-child(3) .label__group:nth-child(1) .info",
+            bailiff: ".col:nth-child(3) .label__group:nth-child(2) .info",
+            period: ".col:nth-child(3) .label__group:nth-child(3) .info",
+            ends: ".col:nth-child(3) .label__group:nth-child(4) .info",
             href: ".col--image a@href",
+            address: ".label__group:nth-child(2) .info",
         }])((err, data) => {
-            if(err) reject(err);
-            else resolve(data);
+            if(err) {
+                reject(err);
+            }
+            else {
+                resolve(data);
+            }
         })
     })
 }

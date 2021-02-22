@@ -13,7 +13,15 @@ async function csvToGoogleSheet(csvFilePath, gooleSheetOptions = {}) {
 
   const sheets = google.sheets({ version: "v4", auth });
 
-  saveData([ [1,2], [3,4] ], sheets, "1HfVZqwiHquRI5nP1BlEkURckxOKzqZMX7vfD7ou3Byk", "Sheet1!A1:Z15000");
+  saveData(
+    [
+      [1, 2],
+      [3, 4],
+    ],
+    sheets,
+    "1HfVZqwiHquRI5nP1BlEkURckxOKzqZMX7vfD7ou3Byk",
+    "Sheet1!A1:Z15000"
+  );
 }
 
 /**
@@ -96,8 +104,8 @@ function saveData(data, googleSheetsObj, spreadsheetId, range) {
       resource,
     },
     (err, result) => {
-        if (err) throw err;
-        console.log(`${result.data.updates.updatedCells} cells appended.`);
+      if (err) throw err;
+      console.log(`${result.data.updates.updatedCells} cells appended.`);
     }
   );
 }

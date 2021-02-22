@@ -32,7 +32,9 @@ const CSV_PATH = path.join(__dirname, "parsedSales.csv");
   storeCSV(data);
   // await storeSQLite(data);
   await storeGoogleSheet(data);
-})();
+})().catch((error) => {
+  console.log(`[ERROR] ${error}`);
+});
 
 async function storePage() {
   const res = await axios.get(SOURCE);

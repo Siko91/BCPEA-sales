@@ -4,24 +4,16 @@ const { google } = require("googleapis");
 const { rejects } = require("assert");
 
 // If modifying these scopes, delete token.json.
-const SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"];
+const SCOPES = ["https://www.googleapis.com/auth/spreadsheets"];
 const TOKEN_PATH = "token.json";
 
-async function csvToGoogleSheet(csvFilePath, gooleSheetOptions = {}) {
+async function updateGoogleSheet(
+  o = { data: [[]], sheetId: "", sheetRange: "" }
+) {
   const cred = fs.readFileSync("credentials.json"); // taken from https://developers.google.com/sheets/api/quickstart/nodejs
   const auth = await authorize(JSON.parse(cred));
-
   const sheets = google.sheets({ version: "v4", auth });
-
-  saveData(
-    [
-      [1, 2],
-      [3, 4],
-    ],
-    sheets,
-    "1HfVZqwiHquRI5nP1BlEkURckxOKzqZMX7vfD7ou3Byk",
-    "Sheet1!A1:Z15000"
-  );
+  await saveData(o.data, sheets, o.sheetId, o.sheetRange);
 }
 
 /**
@@ -92,20 +84,20 @@ async function getNewToken(oAuth2Client) {
  * @param {string} range Like 'Sheet!A1:B2'
  */
 function saveData(data, googleSheetsObj, spreadsheetId, range) {
-  let resource = {
-    values: data,
-  };
-
-  googleSheetsObj.spreadsheets.values.update(
-    {
-      spreadsheetId: spreadsheetId,
-      range: range,
-      valueInputOption: "RAW",
-      resource,
-    },
-    (err, result) => {
-      if (err) throw err;
-      console.log(`${result.data.updates.updatedCells} cells appended.`);
-    }
-  );
+  return new Promise((resolve, reject) => {
+    googleSheetsObj.spreadsheets.values.update(
+      {
+        spreadsheetId: spreadsheetId,
+        range: range,
+        valueInputOption: "RAW",
+        resource: { values: data },
+      },
+      (err, result) => {
+        if (err) reject(err);
+        resolve(result);
+      }
+    );
+  });
 }
+
+module.exports = { updateGoogleSheet };

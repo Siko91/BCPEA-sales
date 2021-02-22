@@ -4,6 +4,8 @@ const fs = require("fs");
 const sqlite3 = require("sqlite3");
 const sqlite = require("sqlite");
 
+const { updateGoogleSheet } = require("./updateGoogleSheet");
+
 const Xray = require("x-ray");
 const x = Xray();
 const SOURCE = "https://sales.bcpea.org/properties?perpage=14000&p=1";
@@ -16,6 +18,7 @@ const SOURCE = "https://sales.bcpea.org/properties?perpage=14000&p=1";
   data = formatData(data);
   storeCSV(data);
   // await storeSQLite(data);
+  await storeGoogleSheet(data);
 })();
 
 async function storePage() {
@@ -138,4 +141,23 @@ function storeCSV(arrayOfObj) {
       arrayOfObj.map((l) => keys.map((k) => `"${l[k]}"`).join(",")).join("\n")
   );
   console.log("Saved CSV");
+}
+
+async function storeGoogleSheet(arrayOfObj) {
+  const keys = Object.keys(arrayOfObj[0]);
+  const emptyLine = keys.map((i) => null);
+
+  const data = [
+    keys,
+    ...arrayOfObj.map((d) => [...keys.map((k) => d[k])]),
+    ...Array(15000 - arrayOfObj.length - 1).fill(emptyLine),
+  ];
+
+  await updateGoogleSheet({
+    data: data,
+    sheetId: "1HfVZqwiHquRI5nP1BlEkURckxOKzqZMX7vfD7ou3Byk",
+    sheetRange: "Sheet1!A1:Z15000",
+  });
+
+  console.log("Saved on Google Sheets");
 }

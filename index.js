@@ -1,5 +1,6 @@
 const axios = require("axios");
 const fs = require("fs");
+const path = require("path");
 
 const sqlite3 = require("sqlite3");
 const sqlite = require("sqlite");
@@ -10,6 +11,17 @@ const Xray = require("x-ray");
 const x = Xray();
 const SOURCE =
   "https://sales.bcpea.org/properties?perpage=15000&order=end_date_low&order=end_date_high";
+
+const LOG_PATH = path.join(__dirname, "logfile.txt");
+const _log = console.log;
+console.log = (str) => {
+  _log(str);
+  fs.appendFileSync(LOG_PATH, `${new Date()} : ${str}\n`);
+};
+
+const HTML_PATH = path.join(__dirname, "sales.bcpea.org.html");
+const DB_PATH = path.join(__dirname, "parsedSales.db");
+const CSV_PATH = path.join(__dirname, "parsedSales.csv");
 
 // Main Code
 (async () => {
@@ -29,7 +41,7 @@ async function storePage() {
 }
 
 function readPage() {
-  return fs.readFileSync("./sales.bcpea.org.html");
+  return fs.readFileSync(HTML_PATH);
 }
 
 async function parse(htmlContents) {
@@ -95,10 +107,10 @@ function noSpace(str) {
 }
 
 async function storeSQLite(arrayOfObj) {
-  if (fs.existsSync("./parsedSales.db")) fs.unlinkSync("./parsedSales.db");
+  if (fs.existsSync(DB_PATH)) fs.unlinkSync(DB_PATH);
 
   const db = await sqlite.open({
-    filename: "./parsedSales.db",
+    filename: DB_PATH,
     driver: sqlite3.Database,
   });
 
@@ -121,7 +133,7 @@ async function storeSQLite(arrayOfObj) {
 function storeCSV(arrayOfObj) {
   const keys = Object.keys(arrayOfObj[0]);
   fs.writeFileSync(
-    "parsedSales.csv",
+    CSV_PATH,
     keys.map((i) => `"${i}"`).join(",") +
       "\n" +
       arrayOfObj.map((l) => keys.map((k) => `"${l[k]}"`).join(",")).join("\n")

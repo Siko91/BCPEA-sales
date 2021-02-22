@@ -1,4 +1,5 @@
 const fs = require("fs");
+const path = require("path");
 const readline = require("readline");
 const { google } = require("googleapis");
 const { rejects } = require("assert");
@@ -8,12 +9,13 @@ const SCOPES = [
   "https://www.googleapis.com/auth/spreadsheets",
   "https://www.googleapis.com/auth/drive.metadata",
 ];
-const TOKEN_PATH = "token.json";
+const TOKEN_PATH = path.join(__dirname, "token.json");
+const CREDENTIALS_PATH = path.join(__dirname, "credentials.json");
 
 async function updateGoogleSheet(
   o = { data: [[]], sheetId: "", sheetRange: "", fileName: "" }
 ) {
-  const cred = fs.readFileSync("credentials.json"); // taken from https://developers.google.com/sheets/api/quickstart/nodejs
+  const cred = fs.readFileSync(CREDENTIALS_PATH); // taken from https://developers.google.com/sheets/api/quickstart/nodejs
   const auth = await authorize(JSON.parse(cred));
 
   await saveData(auth, o.data, o.sheetId, o.sheetRange);

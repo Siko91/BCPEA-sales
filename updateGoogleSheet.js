@@ -4,16 +4,19 @@ const { google } = require("googleapis");
 const { rejects } = require("assert");
 
 // If modifying these scopes, delete token.json.
-const SCOPES = ["https://www.googleapis.com/auth/spreadsheets"];
+const SCOPES = [
+  "https://www.googleapis.com/auth/spreadsheets",
+  "https://www.googleapis.com/auth/drive.metadata",
+];
 const TOKEN_PATH = "token.json";
 
 async function updateGoogleSheet(
-  o = { data: [[]], sheetId: "", sheetRange: "" }
+  o = { data: [[]], sheetId: "", sheetRange: "", fileName: "" }
 ) {
   const cred = fs.readFileSync("credentials.json"); // taken from https://developers.google.com/sheets/api/quickstart/nodejs
   const auth = await authorize(JSON.parse(cred));
-  const sheets = google.sheets({ version: "v4", auth });
-  await saveData(o.data, sheets, o.sheetId, o.sheetRange);
+
+  await saveData(auth, o.data, o.sheetId, o.sheetRange);
 }
 
 /**
@@ -83,9 +86,9 @@ async function getNewToken(oAuth2Client) {
  * @param {string} spreadsheetId the ID of the table
  * @param {string} range Like 'Sheet!A1:B2'
  */
-function saveData(data, googleSheetsObj, spreadsheetId, range) {
+function saveData(auth, data, spreadsheetId, range) {
   return new Promise((resolve, reject) => {
-    googleSheetsObj.spreadsheets.values.update(
+    google.sheets({ version: "v4", auth }).spreadsheets.values.update(
       {
         spreadsheetId: spreadsheetId,
         range: range,

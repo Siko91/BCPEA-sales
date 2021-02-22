@@ -8,7 +8,8 @@ const { updateGoogleSheet } = require("./updateGoogleSheet");
 
 const Xray = require("x-ray");
 const x = Xray();
-const SOURCE = "https://sales.bcpea.org/properties?perpage=14000&p=1";
+const SOURCE =
+  "https://sales.bcpea.org/properties?perpage=15000&order=end_date_low&order=end_date_high";
 
 // Main Code
 (async () => {
@@ -22,22 +23,7 @@ const SOURCE = "https://sales.bcpea.org/properties?perpage=14000&p=1";
 })();
 
 async function storePage() {
-  const res = await axios.get(SOURCE, {
-    headers: {
-      Host: "sales.bcpea.org",
-      "User-Agent":
-        "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:85.0) Gecko/20100101 Firefox/85.0",
-      Accept:
-        "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-      "Accept-Language": "en-US,en;q=0.5",
-      //   "Accept-Encoding": "gzip, deflate, br",
-      DNT: 1,
-      Connection: "keep-alive",
-      "Upgrade-Insecure-Requests": 1,
-      "Sec-GPC": 1,
-      // "Cookie": "__cfduid=d2023d8a1719b642f192944b7acbb15881613851439",
-    },
-  });
+  const res = await axios.get(SOURCE);
   fs.writeFileSync("./sales.bcpea.org.html", res.data);
   console.log("Downloaded HTML File!");
 }
@@ -85,8 +71,8 @@ function formatData(arrayOfObj) {
     };
     result.pricePerMeter =
       parseFloat(result.price) / parseFloat(result.size) + "";
-    result.region = "България " + result.region;
-    result.court = "България гр. " + result.court;
+    result.region = result.region;
+    result.court = "гр. " + result.court;
     result.address = result.address.replace(/"/g, "'").replace(/,/g, "");
     return result;
   });
@@ -145,7 +131,7 @@ function storeCSV(arrayOfObj) {
 
 async function storeGoogleSheet(arrayOfObj) {
   const keys = Object.keys(arrayOfObj[0]);
-  const emptyLine = keys.map((i) => null);
+  const emptyLine = keys.map((i) => undefined);
 
   const data = [
     keys,

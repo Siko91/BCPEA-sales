@@ -20,9 +20,13 @@ const source = "https://sales.bcpea.org/properties?perpage=10000&p=1";
 
 
 async function storePage() {
-    const res = await axios.get(source);
+    try {
+        const res = await axios.get(source);
+    } catch (e) {
+        throw new Error(e.message);
+    }
     fs.writeFileSync("./sales.bcpea.org.html", res.data)
-    console.log("Saved!")
+    console.log("Downloaded HTML File!")
 }
 
 function readPage() {
@@ -67,7 +71,8 @@ function formatData(arrayOfObj) {
         };
         result.pricePerMeter = (parseFloat(result.price) / parseFloat(result.size)) + "";
         result.region = "България " + result.region;
-        result.court = "България " + result.court;
+        result.court = "България гр. " + result.court;
+        result.address = result.address.replace(/"/g, "'").replace(/,/g, "");
         return result;
     })
 }
@@ -103,7 +108,7 @@ async function storeSQLite(arrayOfObj) {
 
     for (let i = 0; i < arrayOfObj.length; i++) {
         const command = `INSERT INTO sales (${keys.join(",")}) VALUES (${
-            keys.map(k => `"${arrayOfObj[i][k].replace(/"/g, "'")}"`).join(",")
+            keys.map(k => `"${arrayOfObj[i][k]}"`).join(",")
         })`;
         await db.run(command)
         if (i % 500 === 0) console.log(`Saved ${i} records in DB`)
@@ -115,6 +120,6 @@ function storeCSV(arrayOfObj) {
     const keys = Object.keys(arrayOfObj[0]);
     fs.writeFileSync("parsedSales.csv",
         keys.map(i =>`"${i}"`).join(",") + "\n" +
-        arrayOfObj.map(l => keys.map(k => `"${l[k].replace(/"/g, "'")}"`).join(",")).join("\n"));
+        arrayOfObj.map(l => keys.map(k => `"${l[k]}"`).join(",")).join("\n"));
     console.log("Saved CSV")
 }

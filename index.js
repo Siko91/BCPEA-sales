@@ -145,7 +145,7 @@ function storeCSV(arrayOfObj) {
 
 async function storeGoogleSheet(arrayOfObj) {
   const keys = Object.keys(arrayOfObj[0]);
-  const emptyLine = keys.map((i) => undefined);
+  const emptyLine = keys.map((i) => null);
 
   const data = [
     keys,
